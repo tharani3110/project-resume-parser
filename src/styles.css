@@ -260,13 +260,15 @@ main {
   font-size: 13px;
 }
 
-#presentSkills li {
+/* Present chips — green. Class-based (not ID) so the React lists can use them. */
+.chips-present li {
   color: #6ee7b7;
   background: rgba(52, 211, 153, 0.08);
   border: 1px solid rgba(52, 211, 153, 0.35);
 }
 
-#missingSkills li {
+/* Missing chips — red */
+.chips-missing li {
   color: #fca5a5;
   background: rgba(248, 113, 113, 0.07);
   border: 1px solid rgba(248, 113, 113, 0.3);
