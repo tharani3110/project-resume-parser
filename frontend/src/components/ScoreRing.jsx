@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { bandFor } from "../lib/mockParse.js";
+import { bandFor } from "../lib/bands.js";
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * 52;
 

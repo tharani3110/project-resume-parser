@@ -117,6 +117,64 @@ main {
   font-size: 14px;
 }
 
+.jd-field {
+  margin-top: 20px;
+}
+
+.jd-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.jd-field textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 140px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #0d1219;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.jd-field textarea::placeholder {
+  color: #5b6b7d;
+}
+
+.jd-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #04120c;
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 .error {
   color: var(--red);
   font-size: 14px;
@@ -206,6 +264,10 @@ main {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
+}
+
+.score-meta p + p {
+  margin-top: 6px;
 }
 
 .skills-grid {

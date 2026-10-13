@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-export default function Dropzone({ onFile, error }) {
+export default function Dropzone({ onFile, fileName, error }) {
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -41,12 +41,25 @@ export default function Dropzone({ onFile, error }) {
         }}
         {...dragHandlers}
       >
-        <svg className="drop-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          className="drop-icon"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <path d="M12 16V4m0 0l-4 4m4-4l4 4" />
           <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
         </svg>
-        <p className="drop-title">Drop your resume here</p>
-        <p className="drop-sub">PDF only — or click to browse</p>
+        <p className="drop-title">{fileName ?? "Drop your resume here"}</p>
+        <p className="drop-sub">
+          {fileName ? "Click to choose a different PDF" : "PDF only — or click to browse"}
+        </p>
         <input
           ref={inputRef}
           type="file"
