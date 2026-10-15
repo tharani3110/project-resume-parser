@@ -1,6 +1,19 @@
-// Mock analysis engine. This is the boundary that the AI step will replace:
-// everything else (routes, storage, the UI) already treats it as a black box
-// that takes a resume + job description and returns a score and skill lists.
+// Pure helpers and the mock analysis engine.
+//
+// When the AI step lands, `analyzeResume` is the one function whose body
+// changes — the matching and seeding around it stay useful as the fallback.
+
+export function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Word-boundary matching: "js" must not light up inside "json", and the dot in
+// "Node.js" must not let its "js" count as JavaScript. That second one is the
+// sneakier false positive, and the `.` in the lookbehind is what prevents it.
+export function matchesAlias(text, alias) {
+  const pattern = new RegExp(`(?<![a-z0-9.])${escapeRegex(alias)}(?![a-z0-9])`, "i");
+  return pattern.test(text);
+}
 
 // Skills we recognize, with the spellings people actually write in postings.
 export const SKILL_CATALOG = [
@@ -28,17 +41,8 @@ export const SKILL_CATALOG = [
   { name: "Next.js", aliases: ["next.js", "nextjs"] },
 ];
 
-const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-// Word-boundary matching, so "js" doesn't light up inside "json" or
-// "react" inside "reactive". This is the whole trick to keyword extraction.
-function hasAlias(text, alias) {
-  const pattern = new RegExp(`(?<![a-z0-9.])${escapeRegex(alias)}(?![a-z0-9])`, "i");
-  return pattern.test(text);
-}
-
 export function extractSkills(text) {
-  return SKILL_CATALOG.filter((skill) => skill.aliases.some((a) => hasAlias(text, a))).map(
+  return SKILL_CATALOG.filter((skill) => skill.aliases.some((a) => matchesAlias(text, a))).map(
     (skill) => skill.name
   );
 }
@@ -51,7 +55,7 @@ export function extractSkills(text) {
  * the AI step land, which skills the resume "contains" is decided by a seed, so
  * the same upload always yields the same result.
  */
-export function analyze({ resumeFileName, resumeSizeBytes, jobDescription }) {
+export function analyzeResume({ resumeFileName, resumeSizeBytes, jobDescription }) {
   const required = extractSkills(jobDescription);
   if (required.length === 0) {
     return { ok: false, reason: "No recognizable skills found in the job description." };
@@ -68,11 +72,9 @@ export function analyze({ resumeFileName, resumeSizeBytes, jobDescription }) {
     (covered ? present : missing).push(skill);
   }
 
-  const score = Math.round((present.length / required.length) * 100);
-
   return {
     ok: true,
-    score,
+    score: Math.round((present.length / required.length) * 100),
     present,
     missing,
     requiredCount: required.length,
@@ -80,7 +82,7 @@ export function analyze({ resumeFileName, resumeSizeBytes, jobDescription }) {
   };
 }
 
-function hashString(str) {
+export function hashString(str) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
@@ -89,7 +91,7 @@ function hashString(str) {
   return h >>> 0;
 }
 
-function mulberry32(seed) {
+export function mulberry32(seed) {
   return function () {
     seed |= 0;
     seed = (seed + 0x6d2b79f5) | 0;
@@ -98,3 +100,8 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+// Wraps an async route handler so a rejected promise reaches Express's error
+// handler instead of turning into an unhandled rejection.
+export const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);

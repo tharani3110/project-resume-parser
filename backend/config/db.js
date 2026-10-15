@@ -18,3 +18,9 @@ export async function connectDb(uri) {
 
   console.log("[db] connected to MongoDB");
 }
+
+// readyState 1 means connected. The health endpoint reports this, so it stays
+// truthful even if the connection drops after boot.
+export function isDbConnected() {
+  return mongoose.connection.readyState === 1;
+}

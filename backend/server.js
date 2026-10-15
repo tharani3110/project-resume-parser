@@ -1,41 +1,19 @@
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import analyzeRoutes from "./src/routes/analyze.js";
-import { connectDb } from "./src/db.js";
+import app from "./app.js";
+import { env } from "./config/env.js";
+import { connectDb } from "./config/db.js";
 
-const app = express();
-const PORT = process.env.PORT || 4000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-
-app.use(cors({ origin: CLIENT_ORIGIN }));
-app.use(express.json({ limit: "1mb" }));
-
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, db: app.locals.dbConnected ? "connected" : "disconnected" });
-});
-
-app.use("/api", analyzeRoutes);
-
-app.use((err, req, res, next) => {
-  console.error("[error]", err);
-  res.status(500).json({ error: "Something went wrong on the server." });
-});
-
-app.listen(PORT, () => {
-  console.log(`[api] listening on http://localhost:${PORT}`);
+// Local development entry point. Vercel does not use this file — it calls
+// api/index.js instead — but `npm run dev` here gives you the same app on a
+// port, with the connection failure logged rather than thrown.
+app.listen(env.port, () => {
+  console.log(`[api] listening on http://localhost:${env.port}`);
+  console.log(`[api] allowing origins: ${env.allowedOrigins.join(", ")}`);
 });
 
 // Not awaited: the server is useful without the database, so a missing
 // MongoDB (not installed, not running, wrong URI) is a warning, not a stop.
-const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/resume_parser";
-connectDb(mongoUri)
-  .then(() => {
-    app.locals.dbConnected = true;
-  })
-  .catch((err) => {
-    app.locals.dbConnected = false;
-    console.warn(
-      `[db] not connected (${err.message}). The API still works; analyses just won't be saved.`
-    );
-  });
+connectDb(env.mongoUri).catch((err) => {
+  console.warn(
+    `[db] not connected (${err.message}). The API still works; analyses just won't be saved.`
+  );
+});
